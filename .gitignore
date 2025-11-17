@@ -1,0 +1,48 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate
+*.tfstate.*
+
+# Variables avec données sensibles
+terraform.tfvars
+*.auto.tfvars
+
+# Clés et credentials
+*.json
+*-key.json
+credentials.json
+
+# Logs
+crash.log
+crash.*.log
+*.log
+
+# Plans Terraform
+tfplan
+tfplan.*
+*.tfplan
+
+# Overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# CLI configuration
+.terraformrc
+terraform.rc
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
