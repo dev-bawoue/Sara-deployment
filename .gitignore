@@ -9,6 +9,7 @@ terraform.tfstate.backup
 # Variables avec données sensibles
 terraform.tfvars
 *.auto.tfvars
+config.yaml
 
 # Clés et credentials
 *.json

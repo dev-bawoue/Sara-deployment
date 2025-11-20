@@ -11,33 +11,61 @@ terraform {
   }
 }
 
+# ==============================================================================
+# CONFIGURATION YAML
+# ==============================================================================
+locals {
+  # Lecture du fichier de configuration YAML
+  config = yamldecode(file("${path.module}/config.yaml"))
+}
+
 provider "google" {
-  project = var.project_id
-  region  = var.region
+  project = local.config.project_id
+  region  = local.config.region
 }
 
 # ==============================================================================
-# MODULE VERTEX AI WORKBENCH
+# MODULE FOUNDATION - Activation des APIs (une seule fois)
+# ==============================================================================
+module "foundation" {
+  source = "./modules/foundation"
+
+  project_id = local.config.project_id
+}
+
+# ==============================================================================
+# MODULE VERTEX AI WORKBENCH - Une instance par appel
 # ==============================================================================
 module "workbench" {
-  source = "./modules/workbench"
+  for_each = local.config.notebook_instances
+  source   = "./modules/workbench"
 
-  project_id = var.project_id
+  # Dépendance sur les APIs
+  depends_on = [module.foundation]
 
-  # Service account : utilise le service account par défaut de Compute Engine
-  # Pour utiliser un service account dédié, créez-le d'abord et passez son email ici
-  service_account_email = var.service_account_email
+  # Configuration de base
+  project_id = local.config.project_id
+  name       = each.key
+  zone       = coalesce(try(each.value.zone, null), local.config.default_zone)
+
+  # Configuration de l'instance
+  machine_type         = coalesce(try(each.value.machine_type, null), "e2-standard-2")
+  boot_disk_size_gb    = coalesce(try(each.value.boot_disk_size_gb, null), 150)
+  data_disk_size_gb    = coalesce(try(each.value.data_disk_size_gb, null), 100)
+  disable_public_ip    = coalesce(try(each.value.disable_public_ip, null), true)
+  idle_timeout_seconds = coalesce(try(each.value.idle_timeout_seconds, null), 3600)
+  owner                = coalesce(try(each.value.owner, null), "")
 
   # Configuration réseau
-  network_name = var.network_name
-  subnet_name  = var.subnet_name
+  network_name = local.config.network_name
+  subnet_name  = local.config.subnet_name
 
-  # Zone par défaut
-  default_zone = var.default_zone
+  # Service account (priorité: instance > défaut > null)
+  service_account_email = coalesce(
+    try(each.value.service_account_email, null),
+    try(local.config.default_service_account_email, null)
+  )
 
-  # Instances à créer
-  notebook_instances = var.notebook_instances
-
-  # Labels communs
-  common_labels = var.common_labels
+  # Labels
+  labels = merge(local.config.common_labels, try(each.value.labels, {}))
 }

@@ -1,0 +1,48 @@
+# Configuration YAML - Vertex AI Workbench
+# Copiez ce fichier en config.yaml et remplissez avec vos valeurs
+
+# Configuration du projet GCP
+project_id: "YOUR-PROJECT-ID"
+region: "europe-west1"
+default_zone: "europe-west1-b"
+
+# Configuration réseau
+network_name: "default"
+subnet_name: "default"
+
+# Service Account par défaut (optionnel - peut être surchargé par instance)
+default_service_account_email: "your-service-account@your-project.iam.gserviceaccount.com"
+
+# Instances Workbench à créer
+# Chaque instance peut avoir sa propre configuration spécifique
+notebook_instances:
+  data-scientist-alice:
+    owner: "alice@company.com"
+    zone: "europe-west1-b"                    # Zone spécifique à l'instance
+    machine_type: "e2-standard-2"             # Type de machine spécifique
+    idle_timeout_seconds: 3600
+    boot_disk_size_gb: 150
+    data_disk_size_gb: 100
+    disable_public_ip: true
+    service_account_email: "alice-sa@your-project.iam.gserviceaccount.com"  # Service account dédié
+
+  # Exemple avec configuration avancée et service account différent
+  # ml-engineer-bob:
+  #   owner: "bob@company.com"
+  #   zone: "us-central1-a"                    # Zone différente
+  #   machine_type: "n1-standard-4"            # Type de machine différent
+  #   idle_timeout_seconds: 7200
+  #   boot_disk_size_gb: 200
+  #   data_disk_size_gb: 500
+  #   disable_public_ip: false
+  #   service_account_email: "bob-sa@your-project.iam.gserviceaccount.com"  # Service account dédié
+  #   labels:
+  #     project: "ml-research"
+  #     priority: "high"
+
+# Labels communs appliqués à toutes les instances
+common_labels:
+  team: "data-science"
+  cost_center: "research"
+  environment: "dev"
+  managed_by: "terraform"
